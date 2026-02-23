@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+/* -------------------- Helper Date Validation -------------------- */
+
+const dateString = z
+  .string()
+  .min(1, "Date is required")
+  .refine((val) => !isNaN(Date.parse(val)), {
+    message: "Date must be in YYYY-MM-DD format",
+  });
+
+/* -------------------- Onboarding -------------------- */
+
 export const onboardingSchema = z.object({
   industry: z.string({
     required_error: "Please select an industry",
@@ -17,15 +28,19 @@ export const onboardingSchema = z.object({
         .min(0, "Experience must be at least 0 years")
         .max(50, "Experience cannot exceed 50 years")
     ),
-  skills: z.string().transform((val) =>
-    val
-      ? val
-          .split(",")
-          .map((skill) => skill.trim())
-          .filter(Boolean)
-      : undefined
-  ),
+  skills: z
+    .string()
+    .transform((val) =>
+      val
+        ? val
+            .split(",")
+            .map((skill) => skill.trim())
+            .filter(Boolean)
+        : []
+    ),
 });
+
+/* -------------------- Contact -------------------- */
 
 export const contactSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -34,13 +49,24 @@ export const contactSchema = z.object({
   twitter: z.string().optional(),
 });
 
+/* -------------------- Resume Entry (Experience / Education / Projects) -------------------- */
+
 export const entrySchema = z
   .object({
     title: z.string().min(1, "Title is required"),
     organization: z.string().min(1, "Organization is required"),
-    startDate: z.string().min(1, "Start date is required"),
-    endDate: z.string().optional(),
+
+    startDate: dateString,
+
+    endDate: z
+      .string()
+      .optional()
+      .refine((val) => !val || !isNaN(Date.parse(val)), {
+        message: "End date must be in YYYY-MM-DD format",
+      }),
+
     description: z.string().min(1, "Description is required"),
+
     current: z.boolean().default(false),
   })
   .refine(
@@ -54,7 +80,21 @@ export const entrySchema = z
       message: "End date is required unless this is your current position",
       path: ["endDate"],
     }
+  )
+  .refine(
+    (data) => {
+      if (data.endDate && data.startDate) {
+        return new Date(data.endDate) >= new Date(data.startDate);
+      }
+      return true;
+    },
+    {
+      message: "End date cannot be before start date",
+      path: ["endDate"],
+    }
   );
+
+/* -------------------- Resume Schema -------------------- */
 
 export const resumeSchema = z.object({
   contactInfo: contactSchema,
@@ -64,6 +104,8 @@ export const resumeSchema = z.object({
   education: z.array(entrySchema),
   projects: z.array(entrySchema),
 });
+
+/* -------------------- Cover Letter -------------------- */
 
 export const coverLetterSchema = z.object({
   companyName: z.string().min(1, "Company name is required"),
