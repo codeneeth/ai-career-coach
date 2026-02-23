@@ -27,8 +27,15 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 
 const DashboardView = ({ insights }) => {
+  // Reset demo data
+  const handleReset = () => {
+    localStorage.clear(); // remove stored demo data
+    window.location.reload(); // refresh page
+  };
+
   // Transform salary data for the chart
   const salaryData = insights.salaryRanges.map((range) => ({
     name: range.role,
@@ -66,7 +73,6 @@ const DashboardView = ({ insights }) => {
   const OutlookIcon = getMarketOutlookInfo(insights.marketOutlook).icon;
   const outlookColor = getMarketOutlookInfo(insights.marketOutlook).color;
 
-  // Format dates using date-fns
   const lastUpdatedDate = format(new Date(insights.lastUpdated), "dd/MM/yyyy");
   const nextUpdateDistance = formatDistanceToNow(
     new Date(insights.nextUpdate),
@@ -75,14 +81,19 @@ const DashboardView = ({ insights }) => {
 
   return (
     <div className="space-y-6">
+      {/* Top Bar */}
       <div className="flex justify-between items-center">
         <Badge variant="outline">Last updated: {lastUpdatedDate}</Badge>
+
+        <Button variant="destructive" size="sm" onClick={handleReset}>
+          Reset Demo
+        </Button>
       </div>
 
       {/* Market Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
               Market Outlook
             </CardTitle>
@@ -97,7 +108,7 @@ const DashboardView = ({ insights }) => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
               Industry Growth
             </CardTitle>
@@ -112,7 +123,7 @@ const DashboardView = ({ insights }) => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Demand Level</CardTitle>
             <BriefcaseIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -127,7 +138,7 @@ const DashboardView = ({ insights }) => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Top Skills</CardTitle>
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -143,8 +154,8 @@ const DashboardView = ({ insights }) => {
         </Card>
       </div>
 
-      {/* Salary Ranges Chart */}
-      <Card className="col-span-4">
+      {/* Salary Chart */}
+      <Card>
         <CardHeader>
           <CardTitle>Salary Ranges by Role</CardTitle>
           <CardDescription>
@@ -158,23 +169,7 @@ const DashboardView = ({ insights }) => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-background border rounded-lg p-2 shadow-md">
-                          <p className="font-medium">{label}</p>
-                          {payload.map((item) => (
-                            <p key={item.name} className="text-sm">
-                              {item.name}: ${item.value}K
-                            </p>
-                          ))}
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
+                <Tooltip />
                 <Bar dataKey="min" fill="#94a3b8" name="Min Salary (K)" />
                 <Bar dataKey="median" fill="#64748b" name="Median Salary (K)" />
                 <Bar dataKey="max" fill="#475569" name="Max Salary (K)" />
@@ -184,7 +179,7 @@ const DashboardView = ({ insights }) => {
         </CardContent>
       </Card>
 
-      {/* Industry Trends */}
+      {/* Trends + Skills */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
@@ -208,7 +203,9 @@ const DashboardView = ({ insights }) => {
         <Card>
           <CardHeader>
             <CardTitle>Recommended Skills</CardTitle>
-            <CardDescription>Skills to consider developing</CardDescription>
+            <CardDescription>
+              Skills to consider developing
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
