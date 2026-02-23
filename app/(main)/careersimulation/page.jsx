@@ -110,7 +110,7 @@ export default function CareerSimulator() {
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Career Simulation Mode</h1>
           <p className="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
-            Step into a role and face real tasks, emails, and decisions — powered by Gemini AI.
+            Step into a role and face real tasks, emails, and decisions — powered by Nirvana AI.
           </p>
         </div>
 
